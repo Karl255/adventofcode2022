@@ -1,0 +1,2 @@
+throw Enum.sum Enum.map String.split(File.read!("i"),"
+"),fn l->s=byte_size(l);[c]=MapSet.to_list(Enum.reduce(Enum.map(Enum.chunk_every(to_charlist(l),div(s,2)),&MapSet.new/1),&MapSet.intersection/2));c-(c in ?A..?Z&&38||96)end
