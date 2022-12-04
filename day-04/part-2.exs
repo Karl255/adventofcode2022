@@ -1,14 +1,16 @@
 File.read!("i")
 |> String.split("\n", trim: true)
-|> Enum.map(fn l ->
-  String.split(l, ",")
-  |> Enum.map(fn r ->
-    String.split(r, "-")
-    |> Enum.map(&String.to_integer/1)
+|> Enum.map(fn line ->
+  String.split(line, ",")
+  |> Enum.map(fn elf ->
+    [s, e] =
+      String.split(elf, "-")
+      |> Enum.map(&String.to_integer/1)
+
+    s..e
   end)
-  |> Enum.map(fn [s, e] -> s..e end)
 end)
-|> Enum.count(fn [r1, r2] ->
-  not Range.disjoint?(r1, r2)
+|> Enum.count(fn [elf1, elf2] ->
+  not Range.disjoint?(elf1, elf2)
 end)
 |> IO.puts()

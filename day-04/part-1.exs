@@ -3,9 +3,11 @@ File.read!("i")
 |> Enum.map(fn line ->
   String.split(line, ",")
   |> Enum.map(fn elf ->
-    String.split(elf, "-")
-    |> Enum.map(&String.to_integer/1)
-    |> then(fn [s, e] -> MapSet.new(s..e) end)
+    [s, e] =
+      String.split(elf, "-")
+      |> Enum.map(&String.to_integer/1)
+
+    MapSet.new(s..e)
   end)
 end)
 |> Enum.count(fn [elf1, elf2] ->
