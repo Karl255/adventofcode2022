@@ -15,39 +15,24 @@ File.stream!("i")
 end)
 |> Enum.reduce(
   {{0, 0}, {0, 0}, MapSet.new([{0, 0}])},
-  fn dir, {{head_x, head_y}, {tail_x, tail_y}, visited} ->
-    {new_head, new_tail} =
+  fn dir, {{hx, hy}, {tx, ty} = tail, visited} ->
+    {new_hx, new_hy} =
       case dir do
-        :right ->
-          if tail_x < head_x do
-            {{head_x + 1, head_y}, {tail_x + 1, head_y}}
-          else
-            {{head_x + 1, head_y}, {tail_x, tail_y}}
-          end
-
-        :left ->
-          if head_x < tail_x do
-            {{head_x - 1, head_y}, {tail_x - 1, head_y}}
-          else
-            {{head_x - 1, head_y}, {tail_x, tail_y}}
-          end
-
-        :up ->
-          if tail_y < head_y do
-            {{head_x, head_y + 1}, {head_x, tail_y + 1}}
-          else
-            {{head_x, head_y + 1}, {tail_x, tail_y}}
-          end
-
-        :down ->
-          if head_y < tail_y do
-            {{head_x, head_y - 1}, {head_x, tail_y - 1}}
-          else
-            {{head_x, head_y - 1}, {tail_x, tail_y}}
-          end
+        :right -> {hx + 1, hy}
+        :left  -> {hx - 1, hy}
+        :up    -> {hx, hy + 1}
+        :down  -> {hx, hy - 1}
       end
 
-    {new_head, new_tail, MapSet.put(visited, new_tail)}
+    new_tail =
+      case dir do
+        :right -> if new_hx > tx + 1, do: {tx + 1, new_hy}, else: tail
+        :left  -> if new_hx < tx - 1, do: {tx - 1, new_hy}, else: tail
+        :up    -> if new_hy > ty + 1, do: {new_hx, ty + 1}, else: tail
+        :down  -> if new_hy < ty - 1, do: {new_hx, ty - 1}, else: tail
+      end
+
+    {{new_hx, new_hy}, new_tail, MapSet.put(visited, new_tail)}
   end
 )
 |> then(fn {_head, _tail, visited} ->
