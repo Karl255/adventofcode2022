@@ -1,5 +1,3 @@
-import Kernel, except: [inspect: 2]
-
 defmodule H do
   def compare(l, r) when is_number(l) and is_number(r) do
     l - r
