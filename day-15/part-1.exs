@@ -1,32 +1,3 @@
-defmodule M do
-  def check(sensor, beacons, checked \\ MapSet.new(), i \\ 0) do
-    diamond = gen_diamond(sensor, i)
-    new_checked = MapSet.union(diamond, checked)
-
-    if MapSet.disjoint?(beacons, diamond) do
-      check(sensor, beacons, new_checked, i + 1)
-    else
-      new_checked
-    end
-  end
-
-  def gen_diamond(origin, 0), do: MapSet.new([origin])
-
-  def gen_diamond({x, y}, offset) do
-    Enum.flat_map(1..offset, fn d1 ->
-      d2 = offset - d1
-
-      [
-        {x + d1, y + d2},
-        {x - d2, y + d1},
-        {x - d1, y - d2},
-        {x + d2, y - d1}
-      ]
-    end)
-    |> MapSet.new()
-  end
-end
-
 input =
   File.stream!("i")
   |> Enum.map(&String.trim/1)
@@ -43,17 +14,31 @@ input =
   end)
 
 sensors = Enum.map(input, &elem(&1, 0))
-
-beacons =
-  Enum.map(input, &elem(&1, 1))
-  |> MapSet.new()
-
+beacons = Enum.map(input, &elem(&1, 1))
 row = if length(sensors) === 14, do: 10, else: 2_000_000
 
-Enum.reduce(sensors, MapSet.new(), fn sensor, checked ->
-  MapSet.union(M.check(sensor, beacons), checked)
+beacons_in_row =
+  Enum.filter(beacons, fn {_x, y} -> y === row end)
+  |> Enum.map(&elem(&1, 0))
+  |> MapSet.new()
+
+Enum.map(sensors, fn {x, y} ->
+  d =
+    Enum.map(beacons, fn {bx, by} ->
+      abs(bx - x) + abs(by - y)
+    end)
+    |> Enum.min()
+
+  {{x, y}, d}
 end)
-|> MapSet.difference(beacons)
-|> Enum.filter(fn {_x, y} -> y === row end)
-|> Enum.count()
-|> IO.puts()
+|> Enum.map(fn {{x, y}, dist} ->
+  col1 = x + dist - abs(row - y)
+  col2 = x - dist + abs(row - y)
+  # this could be further optimized by using a list of ranges, but this works well-enough for now
+  # if col1 < col2, do: col1..col2, else: col2..col1
+  MapSet.new(col1..col2)
+end)
+|> Enum.reduce(&MapSet.union/2)
+|> MapSet.difference(beacons_in_row)
+|> MapSet.size()
+|> IO.inspect(syntax_colors: IO.ANSI.syntax_colors())
