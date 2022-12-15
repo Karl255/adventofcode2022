@@ -66,7 +66,6 @@ sensors =
   end)
 
 limit = if length(input) === 14, do: 20, else: 4_000_000
-|> IO.inspect()
 
 0..limit
 |> Enum.find_value(fn row ->
